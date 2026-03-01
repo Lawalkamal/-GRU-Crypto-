@@ -1,15 +1,65 @@
 'use client'
 
 import { useRef, useEffect } from 'react'
-import type { GameState } from '@/lib/game-engine'
+import type { GameState, Direction } from '@/lib/game-engine'
 import { GRID_SIZE } from '@/lib/game-engine'
 
 interface GameCanvasProps {
   gameState: GameState
+  onSwipe?: (direction: Direction) => void
 }
 
-export function GameCanvas({ gameState }: GameCanvasProps) {
+export function GameCanvas({ gameState, onSwipe }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null)
+
+  // Handle touch swipe gestures
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      }
+    }
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (!touchStartRef.current || !onSwipe) return
+
+      const endX = e.changedTouches[0].clientX
+      const endY = e.changedTouches[0].clientY
+      const deltaX = endX - touchStartRef.current.x
+      const deltaY = endY - touchStartRef.current.y
+
+      // Minimum swipe distance to prevent accidental triggers
+      const minSwipeDistance = 30
+
+      // Determine dominant direction
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // Horizontal swipe
+        if (Math.abs(deltaX) > minSwipeDistance) {
+          onSwipe(deltaX > 0 ? 'RIGHT' : 'LEFT')
+        }
+      } else {
+        // Vertical swipe
+        if (Math.abs(deltaY) > minSwipeDistance) {
+          onSwipe(deltaY > 0 ? 'DOWN' : 'UP')
+        }
+      }
+
+      touchStartRef.current = null
+    }
+
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: true })
+    canvas.addEventListener('touchend', handleTouchEnd, { passive: true })
+
+    return () => {
+      canvas.removeEventListener('touchstart', handleTouchStart)
+      canvas.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [onSwipe])
 
   useEffect(() => {
     const canvas = canvasRef.current

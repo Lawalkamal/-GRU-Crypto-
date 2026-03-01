@@ -81,7 +81,7 @@ export function SnakeGameClient() {
         isRunning={gameState.isRunning}
       />
 
-      <GameCanvas gameState={gameState} />
+      <GameCanvas gameState={gameState} onSwipe={changeDirection} />
 
       <div className="flex items-center gap-3">
         {!gameState.isRunning && !gameState.isGameOver && gameState.score === 0 && (
