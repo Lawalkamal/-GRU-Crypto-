@@ -184,7 +184,7 @@ export function GameCanvas({ gameState, onSwipe }: GameCanvasProps) {
     <canvas
       ref={canvasRef}
       className="aspect-square w-full max-w-[min(80vh,500px)] rounded-lg border border-border"
-      style={{ imageRendering: 'pixelated' }}
+      style={{ imageRendering: 'pixelated', touchAction: 'none', userSelect: 'none' }}
     />
   )
 }
